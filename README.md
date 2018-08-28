@@ -1,1 +1,1 @@
-# MooDy-cat
+# moody-cat
