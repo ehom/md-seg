@@ -17,13 +17,13 @@ gem install md-seg
 ## Usage
 
 ```
-$ md-seg ...
+$ md-seg.rb --input-file filename.md --output-file file-containing-segmented-paragraphs.md
 ```
 
 ### Example
 
 ```
-...
+$ md-seg.rb --input-file README.md --output-file segmented.README.md
 ```
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
