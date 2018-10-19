@@ -3,97 +3,111 @@
 # https://www.gjtorikian.com/commonmarker/
 
 require 'commonmarker'
-require 'logger'
 require 'optparse'
-
-require 'helper'
 require 'paragraph_factory'
 
 module MdSegApp
-  @@paragraph = []
+  def self.handle_paragraph(node)
+    text = node.to_commonmark(:DEFAULT, width = 1200)
+    ParagraphFactory.disassemble(text)
+  end
+
+  def self.handle_html(node)
+    text = node.to_commonmark
+    assembled_paragraph = @@paragraph.assemble(text)
+  end
+
+  def self.handle_table(node)
+    node.to_plaintext
+  end
+
+  def self.handle_as_commonmark(node)
+    node.to_commonmark(:DEFAULT, width = 1200)
+  end
+
+  def self.handle_as_plaintext(node)
+    node.to_plaintext
+  end
+
+  def self.handle_code_block(node)
+    result = nil
+    if node.to_commonmark.match(/^```/)
+      result = node.to_commonmark + "\n"
+    else
+      result = "```\n#{node.to_plaintext}```\n"
+    end
+    result
+  end
+
   def self.iterate_over_nodes(doc)
     @@paragraph = ParagraphFactory.new
-    logger = Helper::logger
     doc.each_with_object([]) do |node, output|
-      if node.type == :paragraph
-        text = node.to_commonmark(:DEFAULT, width = 1200)
-        logger.info("[#{node.type}]\n#{text}")
-        # puts "[#{node.type}]\n#{text}\n"
-        logger.info("[original text in paragraph]: #{text}")
-        output << ParagraphFactory.disassemble(text) << "\n"
-      elsif node.type == :html
-        logger.info("[#{node.type}]\n#{text}")
-        text = node.to_commonmark
-        assembled_paragraph = @@paragraph.assemble(text)
-        output << assembled_paragraph << "\n" unless assembled_paragraph.nil?
-      elsif node.type == :table
-        logger.info("[#{node.type}]\n#{text}")
-        logger.info(puts node.to_plaintext + "\n\n")
-        output << node.to_plaintext + "\n"
-      elsif node.type == :code_block
-        logger.info("[#{node.type}]\n#{text}")
-        logger.info node.to_commonmark
-        if node.to_commonmark.match(/^```/)
-          logger.info(node.to_commonmark + "\n\n")
-          output << node.to_commonmark + "\n"
+      case node.type
+        when :paragraph
+          output << handle_paragraph(node) << "\n"
+        when :html
+          assembled_paragraph = handle_html(node)
+          output << assembled_paragraph << "\n" unless assembled_paragraph.nil?
+        when :table
+          output << handle_as_plaintext(node) << "\n"
+        when :code_block
+          output << handle_code_block(node) << "\n"
+        when :header, :blockquote, :list
+          output << handle_as_commonmark(node) << "\n"
         else
-          logger.info "```\n" + node.to_plaintext + "```\n\n"
-          output << "```\n#{node.to_plaintext}```\n"
-        end
-      elsif node.type == :header || node.type == :blockquote || node.type === :list
-        text = node.to_commonmark(:DEFAULT, width = 1200)
-        logger.info("[#{node.type}]\n#{text}")
-        output << text << "\n"
-      else
-        logger.info "Other: [#{node.type}]"
-        logger.info node.to_plaintext + "\n"
-        output << node.to_plaintext << "\n"
+          puts "Other:[#{node.type}]"
       end
     end
   end
 
-  def self.main(argv)
-
+  def self.parse_args(argv)
     program_name = File.basename($0)
 
     options = {}
+    begin
+      opt_parser = OptionParser.new do |opt|
+        opt.banner = "Usage: #{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]"
+        opt.separator  ""
+        opt.separator  "Options"
 
-    opt_parser = OptionParser.new do |opt|
-      opt.banner = "Usage: #{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]"
-      opt.separator  ""
-      opt.separator  "Options"
+        opt.on("-i", "--input PATH", String,
+               "Required GitHub Markdown filename") do |input_filename|
+          options[:input_filename] = input_filename
+        end
 
-      opt.on("-i", "--input i_filename.md",
-             "Required github markdown filename") do |input_filename|
-        options[:input_filename] = input_filename
+        opt.on("-o", "--output PATH", String,
+               "Required Github Markdown output filename") do |output_filename|
+          options[:output_filename] = output_filename
+        end
+
+        opt.on_tail("-h","--help","help") do
+          puts opt_parser
+          exit
+        end
       end
-
-      opt.on("-o", "--output o_filename.md",
-             "Required github markdown filename") do |output_filename|
-        options[:output_filename] = output_filename
-      end
-
-      opt.on("-d","--debug","debug") do
-        # TODO
-        # set logger switch here
-      end
-
-      opt.on("-h","--help","help") do
-        puts opt_parser
-        exit
-      end
+      opt_parser.parse!(ARGV)
+    rescue StandardError => e
+      puts "Error: %{message}" % {message: e.message}
     end
 
-    opt_parser.parse!(ARGV)
+    puts opt_parser; exit unless options[:input_filename] && options[:output_filename]
+    options
+  end
 
-    raise OptionParser::MissingArgument if options[:input_filename].nil? || options[:output_filename].nil?
-
+  def self.process_file(filename)
     # open github markdown file
-    array_of_lines = File.readlines(options[:input_filename])
+    array_of_lines = File.readlines(filename)
 
     doc = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
 
     lines = iterate_over_nodes(doc)
+  end
+
+  def self.main(argv)
+
+    options = parse_args(argv)
+
+    lines = process_file(options[:input_filename])
 
     pp lines
 
