@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 
 # https://www.gjtorikian.com/commonmarker/
 
@@ -9,12 +8,12 @@ require 'paragraph_factory'
 module MdSegApp
   def self.handle_paragraph(node)
     text = node.to_commonmark(:DEFAULT, width = 1200)
-    ParagraphFactory.disassemble(text)
+    ParagraphFactory.disassemble text
   end
 
   def self.handle_html(node)
     text = node.to_commonmark
-    assembled_paragraph = @@paragraph.assemble(text)
+    assembled_paragraph = @@paragraph.assemble text
   end
 
   def self.handle_table(node)
@@ -43,24 +42,24 @@ module MdSegApp
     @@paragraph = ParagraphFactory.new
     doc.each_with_object([]) do |node, output|
       case node.type
-        when :paragraph
-          output << handle_paragraph(node) << "\n"
-        when :html
-          assembled_paragraph = handle_html(node)
-          output << assembled_paragraph << "\n" unless assembled_paragraph.nil?
-        when :table
-          output << handle_as_plaintext(node) << "\n"
-        when :code_block
-          output << handle_code_block(node) << "\n"
-        when :header, :blockquote, :list
-          output << handle_as_commonmark(node) << "\n"
-        else
-          puts "Other:[#{node.type}]"
+      when :paragraph
+        output << handle_paragraph(node) << "\n"
+      when :html
+        assembled_paragraph = handle_html(node)
+        output << assembled_paragraph << "\n" unless assembled_paragraph.nil?
+      when :table
+        output << handle_as_plaintext(node) << "\n"
+      when :code_block
+        output << handle_code_block(node) << "\n"
+      when :header, :blockquote, :list
+        output << handle_as_commonmark(node) << "\n"
+      else
+        puts "Other:[#{node.type}]"
       end
     end
   end
 
-  def self.parse_args(argv)
+  def self.parse(args)
     program_name = File.basename($0)
 
     options = {}
@@ -85,7 +84,7 @@ module MdSegApp
           exit
         end
       end
-      opt_parser.parse!(ARGV)
+      opt_parser.parse! args
     rescue StandardError => e
       puts "Error: %{message}" % {message: e.message}
     end
@@ -103,11 +102,11 @@ module MdSegApp
     lines = iterate_over_nodes(doc)
   end
 
-  def self.main(argv)
+  def self.main(args)
 
-    options = parse_args(argv)
+    options = parse args
 
-    lines = process_file(options[:input_filename])
+    lines = process_file options[:input_filename]
 
     pp lines
 
