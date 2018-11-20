@@ -29,7 +29,6 @@ module MdSegApp
   end
 
   def self.handle_code_block(node)
-    result = nil
     if node.to_commonmark.match(/^```/)
       result = node.to_commonmark + "\n"
     else
@@ -38,9 +37,9 @@ module MdSegApp
     result
   end
 
-  def self.iterate_over_nodes(doc)
+  def self.process_paragraphs(document)
     @@paragraph = ParagraphFactory.new
-    doc.each_with_object([]) do |node, output|
+    document.each_with_object([]) do |node, output|
       case node.type
       when :paragraph
         output << handle_paragraph(node) << "\n"
@@ -59,59 +58,62 @@ module MdSegApp
     end
   end
 
-  def self.parse(args)
-    program_name = File.basename($0)
-
+  def self.parse(arguments)
     options = {}
-    begin
-      opt_parser = OptionParser.new do |opt|
-        opt.banner = "Usage: #{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]"
-        opt.separator  ""
-        opt.separator  "Options"
+    option_parser = OptionParser.new do |option|
+      option.banner = "Usage: %{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]" % { program_name: File.basename($0) }
+      option.separator  ""
+      option.separator  "Options"
 
-        opt.on("-i", "--input PATH", String,
-               "Required GitHub Markdown filename") do |input_filename|
-          options[:input_filename] = input_filename
-        end
-
-        opt.on("-o", "--output PATH", String,
-               "Required Github Markdown output filename") do |output_filename|
-          options[:output_filename] = output_filename
-        end
-
-        opt.on_tail("-h","--help","help") do
-          puts opt_parser
-          exit
-        end
+      option.on("-i", "--input PATH", String,
+                "Required GitHub Markdown filename") do |input_filename|
+        options[:input_filename] = input_filename
       end
-      opt_parser.parse! args
-    rescue StandardError => e
-      puts "Error: %{message}" % {message: e.message}
+
+      option.on("-o", "--output PATH", String,
+                "Required Github Markdown output filename") do |output_filename|
+        options[:output_filename] = output_filename
+      end
+
+      option.on_tail("-h", "--help", "help") do
+        puts option_parser
+        exit
+      end
     end
 
-    puts opt_parser; exit unless options[:input_filename] && options[:output_filename]
+    option_parser.parse! arguments
     options
   end
 
   def self.process_file(filename)
     # open github markdown file
-    array_of_lines = File.readlines(filename)
-
-    doc = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
-
-    lines = iterate_over_nodes(doc)
+    begin
+      array_of_lines = File.readlines(filename)
+    rescue StandardError => e
+      raise "Could not open \"#{filename}\". Reason: %{message}" % { message: e.message }
+    end
+    document = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
+    lines = process_paragraphs(document)
   end
 
-  def self.main(args)
+  def self.save_to_file(lines, filename)
+    begin
+      File.open(filename, "w+") do |file|
+        file.puts(lines)
+      end
+    rescue StandardError => e
+      raise "Could not write to \"%{filename}\". Reason: %{message}" % { message: e.message }
+    end
+  end
 
-    options = parse args
-
-    lines = process_file options[:input_filename]
-
-    pp lines
-
-    File.open(options[:output_filename], "w+") do |f|
-      f.puts(lines)
+  def self.main(arguments)
+    begin
+      options = parse arguments
+      lines = process_file(options[:input_filename])
+      pp lines
+      save_to_file(lines, options[:output_filename])
+    rescue StandardError => e
+      puts "Error: %{message}" % { message: e.message }
     end
   end
 end
