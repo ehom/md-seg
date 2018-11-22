@@ -76,7 +76,7 @@ module MdSegApp
         options[:output_filename] = output_filename
       end
 
-      option.on_tail("-h", "--help", "help") do
+      option.on_tail("-h", "--help", "Show this message") do
         puts option_parser
         exit
       end
