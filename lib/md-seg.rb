@@ -60,6 +60,7 @@ module MdSegApp
 
   def self.parse(arguments)
     options = {}
+
     option_parser = OptionParser.new do |option|
       option.banner = "Usage: %{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]" % { program_name: File.basename($0) }
       option.separator  ""
@@ -82,6 +83,7 @@ module MdSegApp
     end
 
     option_parser.parse! arguments
+    raise "Input or output filename is missing." unless options[:input_filename] and options[:output_filename]
     options
   end
 
