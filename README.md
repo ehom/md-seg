@@ -17,7 +17,12 @@ gem install md-seg
 ## Usage
 
 ```
-$ md-seg.rb --input-file filename.md --output-file file-containing-segmented-paragraphs.md
+Usage: md-seg.rb -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]
+
+Options
+    -i, --input PATH                 Required GitHub Markdown filename
+    -o, --output PATH                Required Github Markdown output filename
+    -h, --help                       help
 ```
 
 ### Example
