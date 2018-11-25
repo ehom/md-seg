@@ -3,50 +3,7 @@
 
 require 'commonmarker'
 require 'optparse'
-require 'util/paragraph_factory'
-
-module Markdown
-  class FileReader
-    def initialize(file_path)
-      @file_path = file_path
-    end
-
-    def read
-      begin
-        array_of_lines = File.readlines(@file_path)
-      rescue StandardError => e
-        raise "Could not open \"%{filename}\". Reason: %{message}" % { filename: @file_path, message: e.message }
-      end
-    end
-  end
-
-  class FileWriter
-    def initialize(file_path)
-      @file_path = file_path
-    end
-
-    def write(lines)
-      begin
-        File.open(@file_path, "w+") do |file|
-          file.puts(lines)
-        end
-      rescue StandardError => e
-        raise "Could not write to \"%{filename}\". Reason: %{message}" % { filename: @file_path, message: e.message }
-      end
-    end
-  end
-
-  class Document
-    def initialize(array_of_lines)
-      @document = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
-    end
-
-    def process
-      # process_paragraphs should be under Markdown::Document
-      lines = MdSegApp::process_paragraphs @document
-    end
-  end
-end
+require 'paragraph_factory'
 
 module MdSegApp
   def self.handle_paragraph(node)
@@ -126,30 +83,39 @@ module MdSegApp
     end
 
     option_parser.parse! arguments
-
     raise "Input or output filename is missing." unless options[:input_filename] and options[:output_filename]
-
     options
   end
 
-  def self.process_file(input_filename, output_filename)
-    lines = Markdown::FileReader.new(input_filename).read
+  def self.process_file(filename)
+    # open github markdown file
+    begin
+      array_of_lines = File.readlines(filename)
+    rescue StandardError => e
+      raise "Could not open \"#{filename}\". Reason: %{message}" % { message: e.message }
+    end
+    document = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
+    lines = process_paragraphs(document)
+  end
 
-    new_lines = Markdown::Document.new(lines).process
-
-    Markdown::FileWriter.new(output_filename).write new_lines
-
-    new_lines
+  def self.save_to_file(lines, filename)
+    begin
+      File.open(filename, "w+") do |file|
+        file.puts(lines)
+      end
+    rescue StandardError => e
+      raise "Could not write to \"%{filename}\". Reason: %{message}" % { message: e.message }
+    end
   end
 
   def self.main(arguments)
     begin
       options = parse arguments
-      lines = process_file(options[:input_filename], options[:output_filename])
+      lines = process_file(options[:input_filename])
       pp lines
+      save_to_file(lines, options[:output_filename])
     rescue StandardError => e
       puts "Error: %{message}" % { message: e.message }
-      puts e.backtrace
     end
   end
 end
