@@ -3,7 +3,7 @@
 
 require 'commonmarker'
 require 'optparse'
-require 'paragraph_factory'
+require 'util/paragraph_factory'
 
 module MdSegApp
   def self.handle_paragraph(node)
