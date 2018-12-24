@@ -1,5 +1,5 @@
 require 'md-seg/document'
-require 'md-seg/paragraph_factory'
+require 'md-seg/paragraph'
 require 'optparse'
 
 module MdSegApp
@@ -51,7 +51,7 @@ module MdSegApp
       pp lines
     rescue StandardError => e
       puts "Error: %{message}" % { message: e.message }
-      # puts e.backtrace
+      puts e.backtrace
     end
   end
 end

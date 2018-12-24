@@ -3,7 +3,7 @@
 require 'commonmarker'
 
 module Markdown
-    class FileReader
+  class FileReader
     def initialize(file_path)
       @file_path = file_path
     end
@@ -39,7 +39,9 @@ module Markdown
     end
 
     def process
-      # process_paragraphs should be under Markdown::Document
+      # If :paragraph has one sentence, just return it.
+      # Otherwise, mark the beginning and end of the paragraph.
+
       lines = process_paragraphs
     end
 
@@ -47,12 +49,16 @@ module Markdown
 
     def handle_paragraph(node)
       text = node.to_commonmark(:DEFAULT, width = 1200)
-      ParagraphFactory.disassemble text
+      Paragraph::Disassembler.perform text
     end
 
+    # we are only interested in 
+    # <div class="paragraph-sentence"></div>
+    # <div class="paragraph-end"></div>
+    
     def handle_html(node)
       text = node.to_commonmark
-      assembled_paragraph = @@paragraph.assemble text
+      assembled_paragraph = @@paragraph_assembler.perform text
     end
 
     def handle_table(node)
@@ -77,7 +83,7 @@ module Markdown
     end
 
     def process_paragraphs
-      @@paragraph = ParagraphFactory.new
+      @@paragraph_assembler = Paragraph::Assembler.new
 
       @document.each_with_object([]) do |node, output|
         case node.type
