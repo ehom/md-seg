@@ -145,7 +145,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#process_file-class_method" title="process_file (class method)">.<strong>process_file</strong>(input_filename, output_filename)  &#x21d2; Object </a>
+      <a href="#process_file-class_method" title="process_file (class method)">.<strong>process_file</strong>(input_filename, output_filename, add_brackets = false)  &#x21d2; Object </a>
     
 
     
@@ -188,24 +188,24 @@
       <pre class="lines">
 
 
-47
-48
-49
-50
-51
 52
 53
 54
 55
-56</pre>
+56
+57
+58
+59
+60
+61</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 52</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_main'>main</span><span class='lparen'>(</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
   <span class='kw'>begin</span>
     <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='id identifier rubyid_parse'>parse</span> <span class='id identifier rubyid_arguments'>arguments</span>
-    <span class='id identifier rubyid_lines'>lines</span> <span class='op'>=</span> <span class='id identifier rubyid_process_file'>process_file</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:input_filename</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:output_filename</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_lines'>lines</span> <span class='op'>=</span> <span class='id identifier rubyid_process_file'>process_file</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:input_filename</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:output_filename</span><span class='rbracket'>]</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:debug</span><span class='rbracket'>]</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_lines'>lines</span>
   <span class='kw'>rescue</span> <span class='const'>StandardError</span> <span class='op'>=&gt;</span> <span class='id identifier rubyid_e'>e</span>
     <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Error: %{message}</span><span class='tstring_end'>&quot;</span></span> <span class='op'>%</span> <span class='lbrace'>{</span> <span class='label'>message:</span> <span class='id identifier rubyid_e'>e</span><span class='period'>.</span><span class='id identifier rubyid_message'>message</span> <span class='rbrace'>}</span>
@@ -232,6 +232,7 @@
       <pre class="lines">
 
 
+5
 6
 7
 8
@@ -261,13 +262,20 @@
 32
 33
 34
-35</pre>
+35
+36
+37
+38
+39
+40</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 6</span>
+      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 5</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_parse'>parse</span><span class='lparen'>(</span><span class='id identifier rubyid_arguments'>arguments</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span>
+  <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span>
+    <span class='symbol'>:debug</span> <span class='op'>=&gt;</span> <span class='kw'>false</span>
+  <span class='rbrace'>}</span>
 
   <span class='id identifier rubyid_option_parser'>option_parser</span> <span class='op'>=</span> <span class='const'>OptionParser</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_option'>option</span><span class='op'>|</span>
     <span class='id identifier rubyid_option'>option</span><span class='period'>.</span><span class='id identifier rubyid_banner'>banner</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Usage: %{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]</span><span class='tstring_end'>&quot;</span></span> <span class='op'>%</span> <span class='lbrace'>{</span> <span class='label'>program_name:</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_basename'>basename</span><span class='lparen'>(</span><span class='gvar'>$0</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
@@ -282,6 +290,10 @@
     <span class='id identifier rubyid_option'>option</span><span class='period'>.</span><span class='id identifier rubyid_on'>on</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>-o</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>--output PATH</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='const'>String</span><span class='comma'>,</span>
               <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Required Github Markdown output filename</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_output_filename'>output_filename</span><span class='op'>|</span>
       <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:output_filename</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='id identifier rubyid_output_filename'>output_filename</span>
+    <span class='kw'>end</span>
+
+    <span class='id identifier rubyid_option'>option</span><span class='period'>.</span><span class='id identifier rubyid_on'>on</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>--debug</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Run in debug mode</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_debug'>debug</span><span class='op'>|</span>
+      <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:debug</span><span class='rbracket'>]</span> <span class='op'>=</span> <span class='kw'>true</span>
     <span class='kw'>end</span>
 
     <span class='id identifier rubyid_option'>option</span><span class='period'>.</span><span class='id identifier rubyid_on_tail'>on_tail</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>-h</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>--help</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Show this message</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span> <span class='kw'>do</span>
@@ -304,7 +316,7 @@
       <div class="method_details ">
   <h3 class="signature " id="process_file-class_method">
   
-    .<strong>process_file</strong>(input_filename, output_filename)  &#x21d2; <tt>Object</tt> 
+    .<strong>process_file</strong>(input_filename, output_filename, add_brackets = false)  &#x21d2; <tt>Object</tt> 
   
 
   
@@ -316,23 +328,23 @@
       <pre class="lines">
 
 
-37
-38
-39
-40
-41
 42
 43
 44
-45</pre>
+45
+46
+47
+48
+49
+50</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 37</span>
+      <pre class="code"><span class="info file"># File 'lib/md-seg.rb', line 42</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_process_file'>process_file</span><span class='lparen'>(</span><span class='id identifier rubyid_input_filename'>input_filename</span><span class='comma'>,</span> <span class='id identifier rubyid_output_filename'>output_filename</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_process_file'>process_file</span><span class='lparen'>(</span><span class='id identifier rubyid_input_filename'>input_filename</span><span class='comma'>,</span> <span class='id identifier rubyid_output_filename'>output_filename</span><span class='comma'>,</span> <span class='id identifier rubyid_add_brackets'>add_brackets</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_lines'>lines</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Markdown.html" title="Markdown (module)">Markdown</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Markdown/FileReader.html" title="Markdown::FileReader (class)">FileReader</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Markdown/FileReader.html#initialize-instance_method" title="Markdown::FileReader#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_input_filename'>input_filename</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_read'><span class='object_link'><a href="Markdown/FileReader.html#read-instance_method" title="Markdown::FileReader#read (method)">read</a></span></span>
 
-  <span class='id identifier rubyid_new_lines'>new_lines</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Markdown.html" title="Markdown (module)">Markdown</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Markdown/Document.html" title="Markdown::Document (class)">Document</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Markdown/Document.html#initialize-instance_method" title="Markdown::Document#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_lines'>lines</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_process'><span class='object_link'><a href="Markdown/Document.html#process-instance_method" title="Markdown::Document#process (method)">process</a></span></span>
+  <span class='id identifier rubyid_new_lines'>new_lines</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Markdown.html" title="Markdown (module)">Markdown</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Markdown/Document.html" title="Markdown::Document (class)">Document</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Markdown/Document.html#initialize-instance_method" title="Markdown::Document#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_lines'>lines</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_process'><span class='object_link'><a href="Markdown/Document.html#process-instance_method" title="Markdown::Document#process (method)">process</a></span></span> <span class='id identifier rubyid_add_brackets'>add_brackets</span>
 
   <span class='const'><span class='object_link'><a href="Markdown.html" title="Markdown (module)">Markdown</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Markdown/FileWriter.html" title="Markdown::FileWriter (class)">FileWriter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Markdown/FileWriter.html#initialize-instance_method" title="Markdown::FileWriter#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_output_filename'>output_filename</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_write'><span class='object_link'><a href="Markdown/FileWriter.html#write-instance_method" title="Markdown::FileWriter#write (method)">write</a></span></span> <span class='id identifier rubyid_new_lines'>new_lines</span>
 
@@ -348,7 +360,7 @@
 </div>
 
       <div id="footer">
-  Generated on Mon Dec 24 19:48:27 2018 by
+  Generated on Tue Dec 25 12:15:32 2018 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.16 (ruby-2.4.1).
 </div>

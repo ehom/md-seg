@@ -1,10 +1,11 @@
 require 'md-seg/document'
-require 'md-seg/paragraph'
 require 'optparse'
 
 module MdSegApp
   def self.parse(arguments)
-    options = {}
+    options = {
+      :debug => false
+    }
 
     option_parser = OptionParser.new do |option|
       option.banner = "Usage: %{program_name} -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]" % { program_name: File.basename($0) }
@@ -21,6 +22,10 @@ module MdSegApp
         options[:output_filename] = output_filename
       end
 
+      option.on("--debug", "Run in debug mode") do |debug|
+        options[:debug] = true
+      end
+
       option.on_tail("-h", "--help", "Show this message") do
         puts option_parser
         exit
@@ -34,10 +39,10 @@ module MdSegApp
     options
   end
 
-  def self.process_file(input_filename, output_filename)
+  def self.process_file(input_filename, output_filename, add_brackets = false)
     lines = Markdown::FileReader.new(input_filename).read
 
-    new_lines = Markdown::Document.new(lines).process
+    new_lines = Markdown::Document.new(lines).process add_brackets
 
     Markdown::FileWriter.new(output_filename).write new_lines
 
@@ -47,7 +52,7 @@ module MdSegApp
   def self.main(arguments)
     begin
       options = parse arguments
-      lines = process_file(options[:input_filename], options[:output_filename])
+      lines = process_file(options[:input_filename], options[:output_filename], options[:debug])
       pp lines
     rescue StandardError => e
       puts "Error: %{message}" % { message: e.message }

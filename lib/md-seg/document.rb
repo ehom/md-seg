@@ -1,6 +1,7 @@
 # https://www.gjtorikian.com/commonmarker/
 
 require 'commonmarker'
+require_relative 'paragraph'
 
 module Markdown
   class FileReader
@@ -36,12 +37,15 @@ module Markdown
   class Document
     def initialize(array_of_lines)
       @document = CommonMarker.render_doc(array_of_lines.join(''), :DEFAULT, [:autolink, :table, :tagfilter])
+      @paragraph_assembler = Paragraph::Assembler.new
+      @paragraph_disassembler = Paragraph::Disassembler.new
     end
 
-    def process
+    def process(add_brackets = false)
       # If :paragraph has one sentence, just return it.
       # Otherwise, mark the beginning and end of the paragraph.
 
+      @paragraph_disassembler.add_brackets = add_brackets
       lines = process_paragraphs
     end
 
@@ -49,7 +53,7 @@ module Markdown
 
     def handle_paragraph(node)
       text = node.to_commonmark(:DEFAULT, width = 1200)
-      Paragraph::Disassembler.perform text
+      @paragraph_disassembler.perform(text).join("\n\n")
     end
 
     # we are only interested in 
@@ -58,7 +62,7 @@ module Markdown
     
     def handle_html(node)
       text = node.to_commonmark
-      assembled_paragraph = @@paragraph_assembler.perform text
+      assembled_paragraph = @paragraph_assembler.perform text
     end
 
     def handle_table(node)
@@ -83,8 +87,6 @@ module Markdown
     end
 
     def process_paragraphs
-      @@paragraph_assembler = Paragraph::Assembler.new
-
       @document.each_with_object([]) do |node, output|
         case node.type
         when :paragraph
@@ -96,7 +98,10 @@ module Markdown
           output << handle_as_plaintext(node) << "\n"
         when :code_block
           output << handle_code_block(node) << "\n"
-        when :header, :blockquote, :list
+        when :blockquote
+          # Todo: disassemble multi-sentence text body
+          output << handle_as_commonmark(node) << "\n"
+        when :header, :list
           output << handle_as_commonmark(node) << "\n"
         else
           puts "Other:[#{node.type}]"

@@ -143,7 +143,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#process-instance_method" title="#process (instance method)">#<strong>process</strong>  &#x21d2; Object </a>
+      <a href="#process-instance_method" title="#process (instance method)">#<strong>process</strong>(add_brackets = false)  &#x21d2; Object </a>
     
 
     
@@ -194,15 +194,19 @@
       <pre class="lines">
 
 
-37
 38
-39</pre>
+39
+40
+41
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/md-seg/document.rb', line 37</span>
+      <pre class="code"><span class="info file"># File 'lib/md-seg/document.rb', line 38</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_array_of_lines'>array_of_lines</span><span class='rparen'>)</span>
   <span class='ivar'>@document</span> <span class='op'>=</span> <span class='const'>CommonMarker</span><span class='period'>.</span><span class='id identifier rubyid_render_doc'>render_doc</span><span class='lparen'>(</span><span class='id identifier rubyid_array_of_lines'>array_of_lines</span><span class='period'>.</span><span class='id identifier rubyid_join'>join</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='symbol'>:DEFAULT</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='symbol'>:autolink</span><span class='comma'>,</span> <span class='symbol'>:table</span><span class='comma'>,</span> <span class='symbol'>:tagfilter</span><span class='rbracket'>]</span><span class='rparen'>)</span>
+  <span class='ivar'>@paragraph_assembler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Paragraph.html" title="Paragraph (module)">Paragraph</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Paragraph/Assembler.html" title="Paragraph::Assembler (class)">Assembler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Paragraph/Assembler.html#initialize-instance_method" title="Paragraph::Assembler#initialize (method)">new</a></span></span>
+  <span class='ivar'>@paragraph_disassembler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../Paragraph.html" title="Paragraph (module)">Paragraph</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Paragraph/Disassembler.html" title="Paragraph::Disassembler (class)">Disassembler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="../Paragraph/Disassembler.html#initialize-instance_method" title="Paragraph::Disassembler#initialize (method)">new</a></span></span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -219,7 +223,7 @@
       <div class="method_details first">
   <h3 class="signature first" id="process-instance_method">
   
-    #<strong>process</strong>  &#x21d2; <tt>Object</tt> 
+    #<strong>process</strong>(add_brackets = false)  &#x21d2; <tt>Object</tt> 
   
 
   
@@ -231,20 +235,22 @@
       <pre class="lines">
 
 
-41
-42
-43
 44
 45
-46</pre>
+46
+47
+48
+49
+50</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/md-seg/document.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/md-seg/document.rb', line 44</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_process'>process</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_process'>process</span><span class='lparen'>(</span><span class='id identifier rubyid_add_brackets'>add_brackets</span> <span class='op'>=</span> <span class='kw'>false</span><span class='rparen'>)</span>
   <span class='comment'># If :paragraph has one sentence, just return it.
 </span>  <span class='comment'># Otherwise, mark the beginning and end of the paragraph.
 </span>
+  <span class='ivar'>@paragraph_disassembler</span><span class='period'>.</span><span class='id identifier rubyid_add_brackets'>add_brackets</span> <span class='op'>=</span> <span class='id identifier rubyid_add_brackets'>add_brackets</span>
   <span class='id identifier rubyid_lines'>lines</span> <span class='op'>=</span> <span class='id identifier rubyid_process_paragraphs'>process_paragraphs</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -257,7 +263,7 @@
 </div>
 
       <div id="footer">
-  Generated on Mon Dec 24 19:48:27 2018 by
+  Generated on Tue Dec 25 12:15:32 2018 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.16 (ruby-2.4.1).
 </div>
