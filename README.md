@@ -22,7 +22,8 @@ Usage: md-seg.rb -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]
 Options
     -i, --input PATH                 Required GitHub Markdown filename
     -o, --output PATH                Required Github Markdown output filename
-    -h, --help                       help
+        --debug                      Run in debug mode
+    -h, --help                       Show this message
 ```
 
 ### Example
