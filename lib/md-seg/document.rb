@@ -42,10 +42,7 @@ module Markdown
     end
 
     def process(add_brackets = false)
-      # If :paragraph has one sentence, just return it.
-      # Otherwise, mark the beginning and end of the paragraph.
-
-      @paragraph_disassembler.add_brackets = add_brackets
+      @paragraph_disassembler.add_brackets(add_brackets)
       lines = process_paragraphs
     end
 
@@ -100,7 +97,9 @@ module Markdown
           output << handle_code_block(node) << "\n"
         when :blockquote
           # Todo: disassemble multi-sentence text body
-          output << handle_as_commonmark(node) << "\n"
+          # output << handle_as_commonmark(node) << "\n"
+          text = handle_as_commonmark(node)
+          puts "blockquote: #{text}"
         when :header, :list
           output << handle_as_commonmark(node) << "\n"
         else

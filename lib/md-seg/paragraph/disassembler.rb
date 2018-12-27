@@ -1,43 +1,79 @@
 require 'punkt-segmenter'
 
-module Paragraph
+module Base
   class Disassembler
-    attr_accessor :add_brackets
-
     def initialize(add_brackets = false)
-      @add_brackets = add_brackets
+      @adding_brackets = add_brackets
     end
 
     def perform(text)
       tokenizer = Punkt::SentenceTokenizer.new(text)
       sentences = tokenizer.sentences_from_text(text, :output => :sentences_text)
 
-      if sentences.length >= 2
-        results = sentences.take(sentences.length - 1).each_with_object([]) do |sentence, array|
-          # puts "[#{i}] #{sentence}\n\n"
-          array << mark_sentence(sentence)
+      if @adding_brackets
+        bracketed_results = sentences.each_with_object([]) do |sentence, array|
+          array << mark_sentence(sentence.chomp)
         end
-        results << mark_last_sentence(sentences)
+        # pp bracketed_results
+        bracketed_results
       else
-        # puts "single phrase: #{text}"
+        sentences
+      end
+    end
+
+    def add_brackets(add_them = true)
+      @adding_brackets = add_them
+    end
+
+    private
+
+    def mark_sentence(text)
+      "\u00ab%{sentence}\u00bb" % { sentence: text }
+    end
+  end
+end
+
+module Paragraph
+  class Disassembler < Base::Disassembler
+    def initialize(add_brackets = false)
+      super(add_brackets)
+    end
+
+    def perform(text)
+      sentences = super(text)
+      if sentences.length >= 2
+        add_tags_to sentences
+      else
         [ text ]
       end
     end
 
     private
 
-    def mark_sentence(text, add_brackets = false)
-      text = "&#x00ab;%{sentence}&#x00bb;" % { sentence: text } if @add_brackets
+    def add_tags_to(sentences)
+      results = sentences.take(sentences.length - 1).each_with_object([]) do |sentence, array|
+        array << (tag_sentence sentence)
+      end
+      results << (tag_last_sentence sentences)
+    end
 
+    def tag_sentence(text)
       "<div class=\"%{name}\">%{sentence} </div>" % { name: SENTENCE_TAG, sentence: text }
     end
 
-    def mark_last_sentence(sentences, add_brackets = false)
-      text = sentences.last.chomp 
-      text = "&#x00ab;%{sentence}&#x00bb;" % { sentence: text } if @add_brackets
-
+    def tag_last_sentence(sentences)
       "<div class=\"%{name1} %{name2}\">%{sentence}</div>" %
-        { name1: SENTENCE_TAG, name2: P_END_TAG, sentence: text }
+        { name1: SENTENCE_TAG, name2: P_END_TAG, sentence: sentences.last }
+    end
+  end
+end
+
+module Blockquote
+  class Disassembler < Base::Disassembler
+    def initialize
+    end
+
+    def perform(text)
     end
   end
 end

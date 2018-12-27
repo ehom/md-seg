@@ -1,13 +1,12 @@
 require 'nokogiri'
 
-module Paragraph
+module Base
   class Assembler
     def initialize
       @buffer = []
     end
 
     def perform(str)
-      # puts("str: #{str}")
       nokogiri_object = Nokogiri::HTML.fragment(str)
       paragraph = nil
       if nokogiri_object.children.length > 0
@@ -15,16 +14,33 @@ module Paragraph
 
         if sentence?(child)
           @buffer << child.content.lstrip.chomp
-          # puts "content: #{child.content}"
 
           if end_paragraph?(child)
             paragraph = @buffer.join('')
             @buffer.clear
-            # puts "paragraph: #{paragraph}"
           end
+          
         end
       end
       paragraph
+    end
+
+    private
+
+    def sentence?(child)
+      raise "Must be implemented"
+    end
+
+    def end_paragraph(child)
+      raise "Must be implemented"
+    end
+  end
+end
+
+module Paragraph
+  class Assembler < Base::Assembler
+    def perform(str)
+      super(str)
     end
 
     private
@@ -35,6 +51,16 @@ module Paragraph
 
     def end_paragraph?(child)
       child.attribute('class').to_s.match?(P_END_TAG)
+    end
+  end
+end
+
+module Blockquote
+  class Assembler < Base::Assembler
+    def initialize
+    end
+
+    def perform(text)
     end
   end
 end
