@@ -31,3 +31,7 @@ Options
 ```
 $ md-seg.rb --input README.md --output segmented.README.md
 ```
+
+## Implementation Details
+
+... can be found on this [page](https://ehom.github.io/md-seg/docs).
