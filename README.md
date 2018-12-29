@@ -16,7 +16,7 @@ gem install md-seg
 
 ## Usage
 
-```
+<pre>
 Usage: md-seg.rb -i INPUT_FILE.md -o OUTPUT_FILE.md [OPTIONS]
 
 Options
@@ -24,7 +24,7 @@ Options
     -o, --output PATH                Required Github Markdown output filename
         --debug                      Run in debug mode
     -h, --help                       Show this message
-```
+</pre>
 
 ### Example
 
