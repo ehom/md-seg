@@ -28,9 +28,9 @@ Options
 
 ### Example
 
-```
+<pre><code>
 $ md-seg.rb --input README.md --output segmented.README.md
-```
+</code></pre>
 
 ## Implementation Details
 
