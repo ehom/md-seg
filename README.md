@@ -1,6 +1,6 @@
 # md-seg
 
-This tool is used to segment paragraphs in GitHub Markdown files.
+This tool is used to segment a body of text like a paragraph into sentences in GitHub Markdown files.
 
 ## Build
 
